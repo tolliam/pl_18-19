@@ -1,4 +1,4 @@
 # Description
-Analysis of matches from 2018-19 Premier League season
-A line I wrote on my local computer
-Practicing with git
+Analysis of matches from 2018-19 Premier League season.  
+
+Learning to use Github 
