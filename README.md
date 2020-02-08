@@ -1,4 +1,4 @@
 # Description
 Analysis of matches from 2018-19 Premier League season.  
 
-Learning to use Github 
+Data from https://footystats.org/download-stats-csv
