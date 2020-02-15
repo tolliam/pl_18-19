@@ -1,6 +1,10 @@
 ---
 title: "PL Broadcasters, match picks and average goals"
-output: html_notebook
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 ---
 
 We are currently midway through the English Premier League's first every winter break. Well, it's not really a break. The footballing gods (also known as the TV broadcasters), couldn't bear the thought of a weekend with no Premier League football, so the league agreed to stagger a round of fixtures over the space of two weekends, thus giving clubs up to two weeks off, just at slightly different times. This "break" was on the assumption that clubs didn't embroil themselves in FA Replays - [a memo not read by Liverpool FC](https://www.theguardian.com/football/2020/feb/03/jurgen-klopp-liverpool-fa-cup-replay-shrewsbury-laptop). 
@@ -28,9 +32,9 @@ Now let's have a look at all matches which don't kick off at 3pm. We'll read the
 
 ```{r}
 matches_1819 <- matches_1819 %>%
-                mutate(datetime = as.POSIXct(matches_1819$timestamp, origin="1970-01-01")) %>%
-                mutate(day = weekdays(matches_1819$datetime)) %>%
-                mutate(ko_time = strftime(matches_1819$datetime, format="%H:%M:%S"))
+                mutate(datetime = as.POSIXct(timestamp, origin="1970-01-01")) %>%
+                mutate(day = weekdays(datetime)) %>%
+                mutate(ko_time = strftime(datetime, format="%H:%M:%S"))
 ```
 
 Let's create indicator variables for all matches which don't kick of at 3pm on a Saturday to allow us to compare the goal counts. We can see from the chart below that the average goal count was slightly higher for non 3pm kick offs. A key caveat here is that there there are a non trivial amount of midweek matches with evening kick-offs but which aren't televised. There are also matches involving clubs playing in the Europa League (the second tier European competition) which get moved to Sundays to ensure players get at least a couple of days rest between fixtures.
