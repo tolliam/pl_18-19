@@ -1,0 +1,132 @@
+---
+title: "PL Broadcasters, match picks and average goals"
+output: html_notebook
+---
+
+We are currently midway through the English Premier League's first every winter break. Well, it's not really a break. The footballing gods (also known as the TV broadcasters), couldn't bear the thought of a weekend with no Premier League football, so the league agreed to stagger a round of fixtures over the space of two weekends, thus giving clubs up to two weeks off, just at slightly different times. This "break" was on the assumption that clubs didn't embroil themselves in FA Replays - [a memo not read by Liverpool FC](https://www.theguardian.com/football/2020/feb/03/jurgen-klopp-liverpool-fa-cup-replay-shrewsbury-laptop). 
+
+The whole round of fixtures is being shown live on British TV - a bit of novelty but something that has already happened this season during the festive period. However, on a normal weekend, four to six matches will be televised with the kick off time shifted from the traditional Saturday 3pm slot to comply with the holy ["3pm blackout"](https://en.wikipedia.org/wiki/English_football_on_television#3pm_%22Blackout%22), designed to protect attendances at lower league fixtures. 
+
+So how do broadcasters to decide what matches to televise and, by implication. which ones not to bother with? Ultimately, broadcasters will pick the matches they believe will be most popular with subscribers. In practice, this means focussing their picks on matches between or involving the "bigger" clubs, who have larger fan bases and arguably more to play for, be that the title itself or qualification to the lucrative Champions League. The broadcasters also have a habit of choosing matches between clubs flirting with relegation, marketing these as "dog fights" and " relegation six pointers". 
+
+But that is not the whole story as broadcasters usually commit to covering all PL clubs. Not so much out of the goodness of their hearts, more to ensure fans of all clubs have a reason to pay their subscription fees. In making these more marginal picks, I'm going to assume they consider potential entertainment value to viewers, which in practice probably means goals (let's leave to one side the balance of contributions between bad defending and good attacking to this outcome). I presume they also pay someone or perhaps a team of people decent money to make these decisions, given each match works out at about £10 million each to televise. So how good are their picks if we measure them in terms of average number of goals? 
+Let's explore match data from the 2018/19 Premier League season using the Tidyverse set of packages in R to see if we can find out what is going on.
+```{r}
+
+library(tidyverse)
+
+# Load the data
+matches_1819 <- read_csv("data/england-premier-league-matches-2018-to-2019-stats.csv", col_types = cols()) # This second argument just suppresses printing of column info
+
+# Examine data dimenions
+dim(matches_1819)
+```
+
+There are 20 teams in the Premier League, each of which must play the 19 others home and away. That gives 38 fixture rounds. With 10 matches at each round, that gives 380 matches during the season. There are also 54 variables in our data set, although we definitely wont' be needing all of these.
+
+Now let's have a look at all matches which don't kick off at 3pm. We'll read the time stamp and create variables relating to both the day and the kick off time.
+
+```{r}
+matches_1819 <- matches_1819 %>%
+                mutate(datetime = as.POSIXct(matches_1819$timestamp, origin="1970-01-01")) %>%
+                mutate(day = weekdays(matches_1819$datetime)) %>%
+                mutate(ko_time = strftime(matches_1819$datetime, format="%H:%M:%S"))
+```
+
+Let's create indicator variables for all matches which don't kick of at 3pm on a Saturday to allow us to compare the goal counts. We can see from the chart below that the average goal count was slightly higher for non 3pm kick offs. A key caveat here is that there there are a non trivial amount of midweek matches with evening kick-offs but which aren't televised. There are also matches involving clubs playing in the Europa League (the second tier European competition) which get moved to Sundays to ensure players get at least a couple of days rest between fixtures.
+
+```{r}
+matches_1819 <- matches_1819 %>%
+                            mutate(three_pm = if_else(ko_time == "15:00:00", "3pm", "Not 3pm"))
+matches_1819 %>%
+  group_by(three_pm) %>%
+  summarize(mean_goals = mean(total_goal_count)) %>%
+  ggplot(aes(three_pm, mean_goals)) + geom_col()
+
+```
+
+For the last 27 years, Sky Sports have maintained a stranglehold over the lucrative late Sunday afternoon slot - "Super Sunday" - often forming a double header with an earlier lunch time kick off. We'll compare average goal count for matches taking place on a Sunday with those on other days (with the same caveat about this also including matches rearranged due to clubs being involved in the Europa League). We can see that these Sunday matches saw slightly more goals on average than matches taking place on other days.
+
+```{r}
+matches_1819 <- matches_1819 %>%
+                            mutate(super_sun = if_else(day >= "Sunday", "Sunday", "Other day"))
+matches_1819 %>%
+  group_by(super_sun) %>%
+  summarize(mean_goals = mean(total_goal_count)) %>%
+  ggplot(aes(super_sun, mean_goals)) + geom_col()
+```
+
+Some*** evidence the broadcasters fixture selectors are doing a good job then? Maybe they should be given a pay rise? Well, we've only looked at one season so its probably not enough data to draw any conclusion on whether they have just had luck on their side. So let's look at every season since the PL was founded in 1992 - bear in mind though, the number of televised games back in that intial season was only 60 whereas now its 200. 
+
+```{r}
+# Load the data
+all_matches <- read_csv("data/EPL_Set 2.csv",col_types = cols()) # Up to 2017/18
+matches_1819_2 <- read_csv("data/E0-13.csv", col_types = cols()) # Add on 2018/19
+all_matches <- full_join(all_matches, matches_1819_2) # Join
+
+all_matches <- all_matches %>%
+              mutate(datetime = as.POSIXct(all_matches$Date, format="%d/%m/%Y")) %>%
+              mutate(day = weekdays(datetime)) %>%
+              mutate(year = as.numeric(format(datetime, "%Y"))) %>%
+              mutate(month = as.numeric(format(datetime, "%m"))) %>%
+              mutate(ko_time = strftime(datetime, format="%H:%M:%S")) %>% 
+              mutate(TG = FTHG + FTAG)
+```
+
+Maybe we can hold off on that payrise after all - there's not really much difference in the average number of goals.
+
+```{r}
+all_matches <- all_matches %>%
+                            mutate(super_sun = if_else(day >= "Sunday", "Sunday", "Other day"))
+all_matches %>%
+  group_by(super_sun) %>%
+  summarize(mean_goals = mean(TG)) %>%
+  ggplot(aes(super_sun, mean_goals)) + geom_col()
+```
+
+Let's change tack and instead study which fixtures have featured more goals than others since the Premier League was founded. We will do this irrespective of which club is playing at home and which away so need to use a trick to create a suitable key. This involves sorting the values in the home and away team values for each row by alphabetical order.
+
+```{r}
+# Sort the values in the two team columns in to alphabetical order
+alph_df <- as_tibble(t(apply(all_matches[c("HomeTeam", "AwayTeam")],1,sort)))
+
+# Create new columns for alphabetical first and second teams
+all_matches <- add_column(all_matches, team1 = alph_df$V1, team2 = alph_df$V2)
+
+# Use these columns to create a unique key
+all_matches <- all_matches %>%
+                unite(fixture_id, team1, team2)
+```
+
+We have how a key (fixture ID). Of course many club's PL existance is short lived so we will exclude any fixtures that have occurred less than 20 times (10 seasons). Here is the top 10, some of the teams featured are not currently playing in the PL, but of those which are, the Leicester V Tottenham fixture comes out on top with an average of 3.8 goals per game.
+
+```{r}
+all_matches %>%
+  group_by(fixture_id) %>%
+  summarise(mean_goals = mean(TG), number_of_fixtures = n()) %>%
+  filter(number_of_fixtures > 20) %>%
+  arrange(desc(mean_goals))
+```
+
+Here is the bottom 10. (Thankfully) most fixtures in the list feature clubs not currently playing in the PL - the only exception being Aston Villa - West Ham. Interestingly that has continued this season with Villa V West Ham finishing 0:0 but also Sky chose to broadcast it - maybe the aren't basing their selections on evidence after all!
+
+```{r}
+all_matches %>%
+  group_by(fixture_id) %>%
+  summarise(mean_goals = mean(TG), number_of_fixtures = n()) %>%
+  filter(number_of_fixtures > 20) %>%
+  arrange(mean_goals)
+```
+
+BONUS:
+Which month sees the most goals per match? August seems to bad for goals presumably as players are yet to find their shooting boots while May is significantly bette, perhaps as defending goes out of the window in the often inconsequential last fixtures of the season.
+
+```{r}
+all_matches %>%
+  group_by(month) %>%
+  summarize(mean_goals = mean(TG)) %>%
+  mutate(s_month = c(6,7,8,9,10,1,2,3,4,5)) %>%
+  arrange(s_month) %>%
+  ggplot(aes(s_month, mean_goals)) + geom_bar(stat = "identity", fill="blue") +
+  scale_x_discrete("month", limits = c("Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May")) + geom_text(aes(y = mean_goals + 0.1, label = round(mean_goals, 2))) + scale_y_continuous(breaks=NULL)
+```
