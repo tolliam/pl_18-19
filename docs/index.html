@@ -263,7 +263,7 @@ all_matches &lt;- add_column(all_matches, team1 = alph_df$V1, team2 = alph_df$V2
 # Use these columns to create a unique key
 all_matches &lt;- all_matches %&gt;%
                 unite(fixture_id, team1, team2)</code></pre>
-<p>We have how a key (fixture ID). Of course many club’s PL existance is short lived so we will exclude any fixtures that have occurred less than 20 times (10 seasons). Here is the top 10, some of the teams featured are not currently playing in the PL, but of those which are, the Leicester V Tottenham fixture comes out on top with an average of 3.8 goals per game.</p>
+<p>We have how a key (fixture ID). Of course many club’s PL existance is short lived so we will exclude any fixtures that have occurred less than 20 times (10 seasons). Here is the top 10, some of the teams featured are not currently playing in the PL, but of those which are, the Leicester V Tottenham fixture comes out on top with an average of 3.6 goals per game.</p>
 <pre class="r"><code>all_matches %&gt;%
   group_by(fixture_id) %&gt;%
   summarise(mean_goals = mean(TG), number_of_fixtures = n()) %&gt;%

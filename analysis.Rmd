@@ -11,13 +11,13 @@ We are currently midway through the English Premier League's first every winter 
 
 The whole round of fixtures is being shown live on British TV - a bit of novelty but something that has already happened this season during the festive period. However, on a normal weekend, four to six matches will be televised with the kick off time shifted from the traditional Saturday 3pm slot to comply with the holy ["3pm blackout"](https://en.wikipedia.org/wiki/English_football_on_television#3pm_%22Blackout%22), designed to protect attendances at lower league fixtures. 
 
-So how do broadcasters to decide what matches to televise and, by implication. which ones not to bother with? Ultimately, broadcasters will pick the matches they believe will be most popular with subscribers. In practice, this means focussing their picks on matches between or involving the "bigger" clubs, who have larger fan bases and arguably more to play for, be that the title itself or qualification to the lucrative Champions League. The broadcasters also have a habit of choosing matches between clubs flirting with relegation, marketing these as "dog fights" and " relegation six pointers". 
+So how do broadcasters decide what matches to televise and which ones not to bother with? Ultimately, broadcasters will pick the matches they believe will be most popular with subscribers. In practice, this means focussing their picks on matches between or involving the "bigger" clubs, who have larger fan bases and arguably more to play for, be that the title itself or qualification to the lucrative Champions League. The broadcasters also have a habit of choosing matches between clubs flirting with relegation, marketing these as "dog fights" and " relegation six pointers". 
 
-But that is not the whole story as broadcasters usually commit to covering all PL clubs. Not so much out of the goodness of their hearts, more to ensure fans of all clubs have a reason to pay their subscription fees. In making these more marginal picks, I'm going to assume they consider potential entertainment value to viewers, which in practice probably means goals (let's leave to one side the balance of contributions between bad defending and good attacking to this outcome). I presume they also pay someone or perhaps a team of people decent money to make these decisions, given each match works out at about £10 million each to televise. So how good are their picks if we measure them in terms of average number of goals? 
+But that is not the whole story as broadcasters usually commit to covering all PL clubs. Not so much out of the goodness of their hearts, more to ensure fans of all clubs have a reason to pay their subscription fees. In making these more marginal picks, I'm going to assume they consider potential entertainment value to viewers, which in practice probably means goals (let's leave to one side the balance of contributions between bad defending and good attacking to this outcome). I presume they also pay someone or perhaps a team of people decent money to make these decisions, given each match works out at about £10 million each to televise. So how good are their picks if we measure them in terms of average number of goals?  
 Let's explore match data from the 2018/19 Premier League season using the Tidyverse set of packages in R to see if we can find out what is going on.
 ```{r}
 
-library(tidyverse)
+suppressWarnings(library(tidyverse))
 
 # Load the data
 matches_1819 <- read_csv("data/england-premier-league-matches-2018-to-2019-stats.csv", col_types = cols()) # This second argument just suppresses printing of column info
@@ -60,7 +60,7 @@ matches_1819 %>%
   ggplot(aes(super_sun, mean_goals)) + geom_col()
 ```
 
-Some*** evidence the broadcasters fixture selectors are doing a good job then? Maybe they should be given a pay rise? Well, we've only looked at one season so its probably not enough data to draw any conclusion on whether they have just had luck on their side. So let's look at every season since the PL was founded in 1992 - bear in mind though, the number of televised games back in that intial season was only 60 whereas now its 200. 
+We have some evidence the broadcasters fixture selectors are doing a good job then? Maybe they should be given a pay rise? Well, we've only looked at one season so its probably not enough data to draw any conclusion on whether they have just had luck on their side. So let's look at every season since the PL was founded in 1992. Of course we must bear in mind that the number of televised games back in that intial season was only 60 whereas now its 200. 
 
 ```{r}
 # Load the data
@@ -102,7 +102,7 @@ all_matches <- all_matches %>%
                 unite(fixture_id, team1, team2)
 ```
 
-We have how a key (fixture ID). Of course many club's PL existance is short lived so we will exclude any fixtures that have occurred less than 20 times (10 seasons). Here is the top 10, some of the teams featured are not currently playing in the PL, but of those which are, the Leicester V Tottenham fixture comes out on top with an average of 3.8 goals per game.
+We have how a key (fixture ID). Of course many club's PL existance is short lived so we will exclude any fixtures that have occurred less than 20 times (10 seasons). Here is the top 10, some of the teams featured are not currently playing in the PL, but of those which are, the Leicester V Tottenham fixture comes out on top with an average of 3.6 goals per game.
 
 ```{r}
 all_matches %>%
@@ -112,7 +112,7 @@ all_matches %>%
   arrange(desc(mean_goals))
 ```
 
-Here is the bottom 10. (Thankfully) most fixtures in the list feature clubs not currently playing in the PL - the only exception being Aston Villa - West Ham. Interestingly that has continued this season with Villa V West Ham finishing 0:0 but also Sky chose to broadcast it - maybe the aren't basing their selections on evidence after all!
+Here is the bottom 10. (Thankfully) most fixtures in the list feature clubs not currently playing in the PL - the only exception being Aston Villa - West Ham. Interestingly, the first fixture this season (19/20) between those teams finsished 0:0 but also Sky Sports chose to broadcast it - so maybe they aren't basing their selections on any evidence after all!
 
 ```{r}
 all_matches %>%
@@ -123,7 +123,7 @@ all_matches %>%
 ```
 
 BONUS:
-Which month sees the most goals per match? August seems to bad for goals presumably as players are yet to find their shooting boots while May is significantly bette, perhaps as defending goes out of the window in the often inconsequential last fixtures of the season.
+Which month sees the most goals per match? August seems to bad for goals presumably as players are yet to find their shooting boots. May on the other hand is much better, perhaps as defending goes out of the window in the often inconsequential final fixtures of the season.
 
 ```{r}
 all_matches %>%
