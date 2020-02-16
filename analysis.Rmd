@@ -6,14 +6,14 @@ knit: (function(input_file, encoding) {
  encoding=encoding,
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 ---
-
+16/02/2020
 We are currently midway through the English Premier League's first every winter break. Well, it's not really a break. The footballing gods (also known as the TV broadcasters), couldn't bear the thought of a weekend with no Premier League football, so the league agreed to stagger a round of fixtures over the space of two weekends, thus giving clubs up to two weeks off, just at slightly different times. This "break" was on the assumption that clubs didn't embroil themselves in FA Replays - [a memo not read by Liverpool FC](https://www.theguardian.com/football/2020/feb/03/jurgen-klopp-liverpool-fa-cup-replay-shrewsbury-laptop). 
 
 The whole round of fixtures is being shown live on British TV - a bit of novelty but something that has already happened this season during the festive period. However, on a normal weekend, four to six matches will be televised with the kick off time shifted from the traditional Saturday 3pm slot to comply with the holy ["3pm blackout"](https://en.wikipedia.org/wiki/English_football_on_television#3pm_%22Blackout%22), designed to protect attendances at lower league fixtures. 
 
 So how do broadcasters decide what matches to televise and which ones not to bother with? Ultimately, broadcasters will pick the matches they believe will be most popular with subscribers. In practice, this means focussing their picks on matches between or involving the "bigger" clubs, who have larger fan bases and arguably more to play for, be that the title itself or qualification to the lucrative Champions League. The broadcasters also have a habit of choosing matches between clubs flirting with relegation, marketing these as "dog fights" and " relegation six pointers". 
 
-But that is not the whole story as broadcasters usually commit to covering all PL clubs. Not so much out of the goodness of their hearts, more to ensure fans of all clubs have a reason to pay their subscription fees. In making these more marginal picks, I'm going to assume they consider potential entertainment value to viewers, which in practice probably means goals (let's leave to one side the balance of contributions between bad defending and good attacking to this outcome). I presume they also pay someone or perhaps a team of people decent money to make these decisions, given each match works out at about £10 million each to televise. So how good are their picks if we measure them in terms of average number of goals?  
+But that is not the whole story as broadcasters usually commit to covering all PL clubs. Not so much out of the goodness of their hearts, more to ensure fans of all clubs have a reason to pay their subscription fees. In making these more marginal picks, I'm going to assume they consider potential entertainment value to viewers, which in practice probably means goals (let's leave to one side the balance of contributions between bad defending and good attacking to this outcome). I presume they also pay someone or perhaps a team of people decent money to make these decisions, given each match works out at about £10 million each to televise. So how good are their picks if we measure them in terms of average number of goals?    
 Let's explore match data from the 2018/19 Premier League season using the Tidyverse set of packages in R to see if we can find out what is going on.
 ```{r}
 
@@ -77,7 +77,7 @@ all_matches <- all_matches %>%
               mutate(TG = FTHG + FTAG)
 ```
 
-Maybe we can hold off on that payrise after all - there's not really much difference in the average number of goals.
+Unfortunatly, I could not find any historic data available for download that includes kick off times so we will just have to look at the day of the week here. Comparing Sunday matches with those on other days we can see there's negligible difference in the average number of goals.
 
 ```{r}
 all_matches <- all_matches %>%
